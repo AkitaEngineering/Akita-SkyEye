@@ -15,31 +15,33 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
 
 ## Project Structure
 
+```
 akita_skyeye/
 ├── akita_skyeye/
-│   ├── init.py
-│   ├── drone_interface.py  # DroneBridge32 communication
+│   ├── __init__.py
+│   ├── drone_interface.py    # DroneBridge32 communication
 │   ├── reticulum_interface.py # Reticulum integration
-│   ├── command_parser.py # Command parsing and translation
-│   ├── telemetry_handler.py # Telemetry processing
-│   ├── config.py # Configuration handling
-│   ├── utils.py # Utility functions
-│   ├── main.py # Main application
+│   ├── command_parser.py     # Command parsing and translation
+│   ├── telemetry_handler.py  # Telemetry processing
+│   ├── config.py             # Configuration handling
+│   ├── utils.py              # Utility functions
+│   ├── main.py               # Main application
 ├── config/
-│   ├── drone_config.json # Drone-specific settings
+│   ├── drone_config.json     # Drone-specific settings
 │   ├── reticulum_config.json # Reticulum network settings
 ├── scripts/
-│   ├── start_drone.sh # Startup script for the drone
-│   ├── control_station.py # Example control station
+│   ├── start_drone.sh        # Startup script for the drone
+│   ├── control_station.py    # Example control station
 ├── tests/
-│   ├── init.py
-│   ├── test_drone_interface.py # Unit tests for drone interface
+│   ├── __init__.py
+│   ├── test_drone_interface.py   # Unit tests for drone interface
 │   ├── test_reticulum_interface.py # Unit tests for reticulum interface
 │   ├── test_command_parser.py
 │   ├── test_telemetry_handler.py
-├── README.md # This file
-├── requirements.txt # Project dependencies
+├── README.md                 # This file
+├── requirements.txt          # Project dependencies
 
+```
 
 ## Getting Started
 

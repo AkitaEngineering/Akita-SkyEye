@@ -14,7 +14,7 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
 * **Unit Tests:** Includes unit tests to ensure code quality and reliability.
 
 ## Project Structure
-'''
+
 akita_skyeye/
 ├── akita_skyeye/
 │   ├── init.py
@@ -39,7 +39,7 @@ akita_skyeye/
 │   ├── test_telemetry_handler.py
 ├── README.md # This file
 ├── requirements.txt # Project dependencies
-'''
+
 
 
 ## Getting Started

@@ -1,0 +1,7 @@
+{
+  "drone_id": "drone001",
+  "dronebridge_serial_port": "/dev/ttyAMA0",
+  "dronebridge_baudrate": 115200,
+  "failsafe_altitude": 10,
+  "failsafe_battery": 3.5
+}

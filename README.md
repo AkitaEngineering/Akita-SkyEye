@@ -41,7 +41,6 @@ akita_skyeye/
 ├── requirements.txt # Project dependencies
 
 
-
 ## Getting Started
 
 ###   Prerequisites

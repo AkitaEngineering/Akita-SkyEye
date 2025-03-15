@@ -1,0 +1,5 @@
+{
+  "interface": "wlan0",
+  "identity_file": "akita_skyeye_drone001.id",
+  "announce_interval": 2
+}

@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 from akita_skyeye.drone_interface import DroneInterface
 import logging
+import serial
 
 logging.disable(logging.CRITICAL) # disable logging during tests.
 

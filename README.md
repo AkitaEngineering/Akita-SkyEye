@@ -1,122 +1,166 @@
-# Akita SkyEye: DroneBridge32 Reticulum Integration
+# Akita SkyEye
 
-Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh network, enabling long-range, resilient, and decentralized control and telemetry for drone operations.
+Akita SkyEye bridges a drone-side serial link with the Reticulum mesh network so commands and telemetry can move over a resilient, decentralized transport. The project also includes optional MAVLink and ExpressLRS adapters for higher-level flight control, mission handling, RC override, and link statistics.
 
 ## Features
 
-* **Extended Range:** Leverages Reticulum's multi-hop mesh networking for increased operational range.
-* **Resilience:** Mesh network architecture provides redundancy and fault tolerance.
-* **Decentralized Control:** Enables distributed control and monitoring of drones.
-* **Telemetry Aggregation:** Centralized collection and analysis of drone telemetry data.
-* **Failsafe Mechanisms:** Includes basic failsafe checks for altitude and battery voltage.
-* **MAVLink Flight Integration:** Supports MAVLink arm, disarm, mode changes, takeoff/land, and mission upload/start/pause/resume/clear flows.
-* **ExpressLRS RC Integration:** Supports CRSF/ExpressLRS RC override output and link statistics ingestion.
-* **Structured Command Set:** Uses a standardized JSON command format.
-* **Logging:** Comprehensive logging for debugging and monitoring.
-* **Unit Tests:** Includes unit tests to ensure code quality and reliability.
+- Reticulum-based command and telemetry transport
+- Serial DroneBridge integration for command forwarding and telemetry ingestion
+- Optional MAVLink support for arm, disarm, takeoff, land, mode changes, and mission workflows
+- Optional ExpressLRS support for CRSF RC override and link statistics
+- Failsafe checks for altitude, battery, and ExpressLRS link quality
+- Test coverage for the command parser, drone interface, Reticulum wrapper, MAVLink adapter, and ExpressLRS adapter
 
+## Repository Layout
 
+```text
+akita_skyeye/   Core package
+config/         Drone and Reticulum configuration
+scripts/        Convenience launch scripts
+tests/          Unit tests
+```
 
-## Getting Started
+## Requirements
 
-###   Prerequisites
+- Python 3.6+
+- Reticulum installed on the systems that will exchange commands and telemetry
+- Access to the drone serial device if you are using the DroneBridge serial path
+- Optional MAVLink endpoint if you enable the `mavlink` section in the drone config
+- Optional ExpressLRS serial device if you enable the `expresslrs` section in the drone config
 
-* Python 3.6+
-* Reticulum installed and configured.
-* DroneBridge32 hardware and software.
-* Raspberry Pi or similar device for drone integration.
-* pyserial
-* pymavlink for MAVLink mission control integration.
+## Installation
 
-###   Installation
+```bash
+git clone https://github.com/AkitaEngineering/Akita-SkyEye.git
+cd Akita-SkyEye
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-1.  Clone the repository:
+## Configuration
 
-    ```bash
-    git clone [repository_url]
-    cd akita_skyeye
-    ```
+Configuration files are loaded relative to the repository root.
 
-2.  Install dependencies:
+### Drone Configuration
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+Edit `config/drone_config.json` to match your hardware and enabled integrations:
 
-###   Configuration
-
-1.  Modify `config/drone_config.json` to match your DroneBridge32 setup:
-
-    ```json
-    {
-      "drone_id": "drone001",
-      "dronebridge_serial_port": "/dev/ttyAMA0",
-      "dronebridge_baudrate": 115200,
-      "failsafe_altitude": 10,
-            "failsafe_battery": 3.5,
-            "failsafe_link_quality": 30,
-            "mavlink": {
-                "enabled": false,
-                "connection": "udp:127.0.0.1:14550",
-                "baudrate": 115200,
-                "wait_heartbeat": false,
-                "source_system": 250,
-                "source_component": 0,
-                "target_system": 1,
-                "target_component": 1
-            },
-            "expresslrs": {
-                "enabled": false,
-                "serial_port": "/dev/ttyUSB0",
-                "baudrate": 420000,
-                "timeout": 0.1,
-                "address": 238
-            }
+```json
+{
+    "drone_id": "drone001",
+    "dronebridge_serial_port": "/dev/ttyAMA0",
+    "dronebridge_baudrate": 115200,
+    "failsafe_altitude": 10,
+    "failsafe_battery": 3.5,
+    "failsafe_link_quality": 30,
+    "mavlink": {
+        "enabled": false,
+        "connection": "udp:127.0.0.1:14550",
+        "baudrate": 115200,
+        "wait_heartbeat": false,
+        "source_system": 250,
+        "source_component": 0,
+        "target_system": 1,
+        "target_component": 1
+    },
+    "expresslrs": {
+        "enabled": false,
+        "serial_port": "/dev/ttyUSB0",
+        "baudrate": 420000,
+        "timeout": 0.1,
+        "address": 238
     }
-    ```
+}
+```
 
-2.  Modify `config/reticulum_config.json` to match your Reticulum network setup:
+Notes:
 
-    ```json
-    {
-      "interface": "wlan0",
-      "identity_file": "akita_skyeye_drone001.id",
-      "announce_interval": 2
-    }
-    ```
+- Leave `mavlink.enabled` and `expresslrs.enabled` set to `false` unless those links are actually available.
+- If no high-level adapter handles a command, the command is written to `dronebridge_serial_port` as a newline-delimited UTF-8 payload.
 
-3.  Generate a Reticulum identity file for your drone using `reticulum-mkid` and place it in the `config/` directory.
+### Reticulum Configuration
 
-###   Running the Application
+Edit `config/reticulum_config.json` to match your Reticulum setup:
 
-1.  **On the Drone:**
+```json
+{
+    "interface": "wlan0",
+    "identity_file": "akita_skyeye_drone001.id",
+    "announce_interval": 2
+}
+```
 
-    * Copy the `akita_skyeye` directory to your Raspberry Pi.
-    * Make the startup script executable: `chmod +x scripts/start_drone.sh`.
-    * Run the script: `./scripts/start_drone.sh`.
+Important:
 
-2.  **On the Control Station:**
+- `identity_file` is passed directly to `reticulum.Identity(...)`. Use the exact path you want Reticulum to open.
+- If you store the identity under `config/`, set `identity_file` to that full relative path, for example `config/akita_skyeye_drone001.id`.
+- Create the identity file before starting the drone-side process.
 
-    * Copy `scripts/control_station.py` to your control computer.
-    * Run the script: `python3 scripts/control_station.py`.
+## Running
 
-###   Usage
+Run the project from the repository root unless you package and install it with the same layout. Do not copy only the `akita_skyeye/` package directory; the runtime expects `config/` and `scripts/` to exist alongside it.
 
-* Use the control station to send JSON commands to the drone (e.g., `{"command": "arm"}`).
-* MAVLink mission control commands include `mission_upload`, `mission_start`, `mission_pause`, `mission_resume`, and `mission_clear`.
-* ExpressLRS RC override commands use `{"command": "rc_override", "channels": [1000, 1000, 1000, 1000]}`.
-* Telemetry data will be displayed on the control station.
-* The drone will perform failsafe checks for altitude and battery voltage.
+### Drone Side
 
-###   Important Notes
+```bash
+python3 -m akita_skyeye.main
+```
 
-* **DroneBridge32 Integration:** Adapt the `drone_interface.py` code to match your specific DroneBridge32 hardware and communication protocols.
-* **Testing:** Thoroughly test the system in a safe environment before real-world deployment.
-* **Safety:** Prioritize drone safety and follow all applicable regulations.
-* **Reticulum Configuration:** Ensure Reticulum is properly installed and configured on all devices.
-* **SoftAP:** The drone is designed to create its own softAP for local network access.
-* **Telemetry Parsing:** The telemetry parsing is example code. Replace it with your actual telemetry parsing.
+Or use the helper script:
 
-###   Contributing
+```bash
+./scripts/start_drone.sh
+```
 
-Contributions are welcome! Please feel free to submit pull requests or open issues.
+### Control Station
+
+```bash
+python3 scripts/control_station.py
+```
+
+The control-station script prompts for JSON command payloads and sends them over Reticulum.
+
+## Command Format
+
+Commands are JSON objects with a `command` field.
+
+```json
+{"command": "arm"}
+{"command": "disarm"}
+{"command": "takeoff", "altitude": 25}
+{"command": "land"}
+{"command": "set_mode", "mode": "GUIDED"}
+{"command": "mission_upload", "mission": [{"lat": 40.7128, "lon": -74.0060, "alt": 25}]}
+{"command": "mission_start"}
+{"command": "mission_pause"}
+{"command": "mission_resume"}
+{"command": "mission_clear"}
+{"command": "rc_override", "channels": [1000, 1000, 1000, 1000]}
+```
+
+Validation rules implemented by the parser:
+
+- `takeoff` requires a numeric `altitude`
+- `set_mode` requires a string `mode`
+- `mission_upload` requires a non-empty mission list with numeric `lat`, `lon`, and `alt`
+- `rc_override` requires 4 to 16 numeric channel values
+
+## Telemetry and Failsafes
+
+- Serial telemetry can be a JSON object or a comma-separated payload
+- MAVLink telemetry can add flight mode, position, battery, and signal values
+- ExpressLRS telemetry adds an `expresslrs` object and can populate signal from `uplink_link_quality`
+- The drone interface triggers a landing command when configured altitude, battery, or ExpressLRS link-quality thresholds are crossed
+
+## Testing
+
+```bash
+pytest
+```
+
+## Notes
+
+- The Reticulum wrapper includes a shim so imports and tests still work when the `reticulum` module is absent, but live networking still requires a real Reticulum installation.
+- `akita_skyeye/drone_interface.py` contains example telemetry parsing for serial data. Adjust it to match your actual DroneBridge payload format.
+- Test and validate the system in a safe environment before flight use.

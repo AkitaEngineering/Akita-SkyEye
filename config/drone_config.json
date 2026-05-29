@@ -3,5 +3,23 @@
   "dronebridge_serial_port": "/dev/ttyAMA0",
   "dronebridge_baudrate": 115200,
   "failsafe_altitude": 10,
-  "failsafe_battery": 3.5
+  "failsafe_battery": 3.5,
+  "failsafe_link_quality": 30,
+  "mavlink": {
+    "enabled": false,
+    "connection": "udp:127.0.0.1:14550",
+    "baudrate": 115200,
+    "wait_heartbeat": false,
+    "source_system": 250,
+    "source_component": 0,
+    "target_system": 1,
+    "target_component": 1
+  },
+  "expresslrs": {
+    "enabled": false,
+    "serial_port": "/dev/ttyUSB0",
+    "baudrate": 420000,
+    "timeout": 0.1,
+    "address": 238
+  }
 }

@@ -1,8 +1,15 @@
-import reticulum as rt
+import sys
+import types
 import json
 from .config import load_reticulum_config
 import logging
 from unittest.mock import MagicMock
+
+try:
+    import reticulum as rt
+except ModuleNotFoundError:
+    rt = types.SimpleNamespace()
+    sys.modules["reticulum"] = rt
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -79,3 +86,6 @@ class ReticulumInterface:
     def register_command_handler(self, command_handler):
         rt.Link.register_incoming(self.destination, command_handler)
         logging.info("Command handler registered.")
+
+    def update_network(self):
+        rt.Network.update()

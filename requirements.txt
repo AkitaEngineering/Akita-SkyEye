@@ -1,2 +1,3 @@
 reticulum
 pyserial
+pymavlink

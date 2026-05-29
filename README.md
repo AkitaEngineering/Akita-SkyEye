@@ -9,6 +9,8 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
 * **Decentralized Control:** Enables distributed control and monitoring of drones.
 * **Telemetry Aggregation:** Centralized collection and analysis of drone telemetry data.
 * **Failsafe Mechanisms:** Includes basic failsafe checks for altitude and battery voltage.
+* **MAVLink Flight Integration:** Supports MAVLink arm, disarm, mode changes, takeoff/land, and mission upload/start/pause/resume/clear flows.
+* **ExpressLRS RC Integration:** Supports CRSF/ExpressLRS RC override output and link statistics ingestion.
 * **Structured Command Set:** Uses a standardized JSON command format.
 * **Logging:** Comprehensive logging for debugging and monitoring.
 * **Unit Tests:** Includes unit tests to ensure code quality and reliability.
@@ -24,6 +26,7 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
 * DroneBridge32 hardware and software.
 * Raspberry Pi or similar device for drone integration.
 * pyserial
+* pymavlink for MAVLink mission control integration.
 
 ###   Installation
 
@@ -50,7 +53,25 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
       "dronebridge_serial_port": "/dev/ttyAMA0",
       "dronebridge_baudrate": 115200,
       "failsafe_altitude": 10,
-      "failsafe_battery": 3.5
+            "failsafe_battery": 3.5,
+            "failsafe_link_quality": 30,
+            "mavlink": {
+                "enabled": false,
+                "connection": "udp:127.0.0.1:14550",
+                "baudrate": 115200,
+                "wait_heartbeat": false,
+                "source_system": 250,
+                "source_component": 0,
+                "target_system": 1,
+                "target_component": 1
+            },
+            "expresslrs": {
+                "enabled": false,
+                "serial_port": "/dev/ttyUSB0",
+                "baudrate": 420000,
+                "timeout": 0.1,
+                "address": 238
+            }
     }
     ```
 
@@ -82,6 +103,8 @@ Akita SkyEye is a project that integrates DroneBridge32 with the Reticulum mesh 
 ###   Usage
 
 * Use the control station to send JSON commands to the drone (e.g., `{"command": "arm"}`).
+* MAVLink mission control commands include `mission_upload`, `mission_start`, `mission_pause`, `mission_resume`, and `mission_clear`.
+* ExpressLRS RC override commands use `{"command": "rc_override", "channels": [1000, 1000, 1000, 1000]}`.
 * Telemetry data will be displayed on the control station.
 * The drone will perform failsafe checks for altitude and battery voltage.
 
